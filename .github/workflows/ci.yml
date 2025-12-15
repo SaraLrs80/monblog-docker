@@ -93,7 +93,6 @@ jobs:
           echo 'MySQL connection OK';
           "
             - name: Init database schema
-        run: |
           mysql -h 127.0.0.1 -u bloguser -pblogpass monblog < database/init.sql
 
       - name: Test SELECT query
