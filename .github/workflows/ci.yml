@@ -46,69 +46,43 @@ jobs:
          docker build -t monblog-docker . 
 
  mysql_test:
-    name: Test MySQL connection
-    runs-on: ubuntu-latest
-    needs: lint_php
+  name: Test MySQL connection + schema
+  runs-on: ubuntu-latest
+  needs: lint_php
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: monblog
-          MYSQL_USER: bloguser
-          MYSQL_PASSWORD: blogpass
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
+  services:
+    mysql:
+      image: mysql:8.0
+      env:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: monblog
+        MYSQL_USER: bloguser
+        MYSQL_PASSWORD: blogpass
+      ports:
+        - 3306:3306
+      options: >-
+        --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+        --health-interval=10s
+        --health-timeout=5s
+        --health-retries=10
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup PHP 8.2 + pdo_mysql
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.2"
-          extensions: pdo_mysql
+    - name: Setup PHP 8.2 + pdo_mysql
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: "8.2"
+        extensions: pdo_mysql
 
-      - name: Wait for MySQL
-        run: |
-          echo " Waiting for MySQL..."
-          sleep 20
+    - name: Wait for MySQL
+      run: sleep 20
 
-      - name: Test PDO connection
-        run: |
-          php -r "
-          new PDO(
-            'mysql:host=127.0.0.1;dbname=monblog;charset=utf8',
-            'bloguser',
-            'blogpass',
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-          );
-          echo 'MySQL connection OK';
-          "
-            - name: Init database schema
-          mysql -h 127.0.0.1 -u bloguser -pblogpass monblog < database/init.sql
+    - name: Init database schema
+      run: |
+        mysql -h 127.0.0.1 -u bloguser -pblogpass monblog < database/init.sql
 
-      - name: Test SELECT query
-        run: |
-          php -r "
-          \$pdo = new PDO(
-            'mysql:host=127.0.0.1;dbname=monblog;charset=utf8',
-            'bloguser',
-            'blogpass'
-          );
-          \$stmt = \$pdo->query('SELECT COUNT(*) FROM T_BILLET');
-          \$count = \$stmt->fetchColumn();
-          if (\$count < 1) {
-            throw new Exception(' No data found');
-          }
-          echo \" SELECT OK, billets = \$count\";
-          "
-
- 
+    - name: Test SELECT query with PDO
+      run: |
+        php -r '$pdo=new PDO("mysql:host=127.0.0.1;dbname=monblog;charset=utf8","bloguser","blogpass");$count=$pdo->query("SELECT COUNT(*) FROM T_BILLET")->fetchColumn();if($count<1){exit(1);}echo "✅ SELECT OK, billets=$count\n";'

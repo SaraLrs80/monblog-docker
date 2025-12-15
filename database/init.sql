@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS T_BILLET (
+  BIL_ID INT AUTO_INCREMENT PRIMARY KEY,
+  BIL_DATE DATETIME,
+  BIL_TITRE VARCHAR(100),
+  BIL_CONTENU TEXT
+);
+
+INSERT INTO T_BILLET (BIL_DATE, BIL_TITRE, BIL_CONTENU)
+VALUES
+(NOW(), 'Premier billet CI', 'Test insertion depuis GitHub Actions'),
+(NOW(), 'Deuxième billet CI', 'Pipeline CI avec MySQL OK');
