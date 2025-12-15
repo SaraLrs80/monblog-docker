@@ -6,31 +6,29 @@ on:
  pull_request: 
    branches: [ "main" ] 
  
-jobs:
-  lint_php:
-    name: Lint PHP
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.2"
-
-      - name: PHP syntax check
-        run: |
-          echo " Vérification syntaxe PHP"
-          cd MonBlog_V3/src
-          php -l index.php
-          php -l Modele.php
-          php -l vueAccueil.php
-          php -l vueErreur.php
-          php -l gabarit.php
-
+jobs: 
+ lint_php: 
+   name: Lint PHP 
+   runs-on: ubuntu-latest 
+   steps: 
+     - name: Checkout code 
+       uses: actions/checkout@v4 
  
-build_docker: 
+     - name: Setup PHP 8.2 
+       uses: shivammathur/setup-php@v2 
+       with: 
+         php-version: "8.2" 
+ 
+     - name: PHP syntax check 
+       run: | 
+         echo " Vérification syntaxe PHP" 
+         php -l MonBlog_V3/src/index.php 
+         php -l MonBlog_V3/src/Modele.php 
+         php -l MonBlog_V3/src/vueAccueil.php 
+         php -l MonBlog_V3/src/vueErreur.php 
+         php -l MonBlog_V3/src/gabarit.php 
+ 
+ build_docker: 
    name: Build Docker image 
    runs-on: ubuntu-latest 
    needs: lint_php 
