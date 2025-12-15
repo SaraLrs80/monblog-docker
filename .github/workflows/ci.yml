@@ -92,4 +92,24 @@ jobs:
           );
           echo 'MySQL connection OK';
           "
+            - name: Init database schema
+        run: |
+          mysql -h 127.0.0.1 -u bloguser -pblogpass monblog < database/init.sql
+
+      - name: Test SELECT query
+        run: |
+          php -r "
+          \$pdo = new PDO(
+            'mysql:host=127.0.0.1;dbname=monblog;charset=utf8',
+            'bloguser',
+            'blogpass'
+          );
+          \$stmt = \$pdo->query('SELECT COUNT(*) FROM T_BILLET');
+          \$count = \$stmt->fetchColumn();
+          if (\$count < 1) {
+            throw new Exception(' No data found');
+          }
+          echo \" SELECT OK, billets = \$count\";
+          "
+
  
